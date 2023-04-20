@@ -37,6 +37,9 @@ class Player(context: Context, screenX: Int, screenY: Int) {
             positionX = screenXLimit - width.toInt()/2
             speed = 0
         } else positionX += speed
+
+        hitbox.left = positionX.toFloat()-(width/2)
+        hitbox.right = hitbox.left + width
     }
 
 }

@@ -60,6 +60,19 @@ class GameFragment : Fragment() {
 
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (gameView.playing){
+            gameView.backgroundSound?.pause()
+            gameView.soundPool?.release()
+        }
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        gameView.backgroundSound?.start()
+    }
 
 
 

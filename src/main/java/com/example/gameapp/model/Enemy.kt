@@ -9,9 +9,9 @@ import java.util.*
 
 class Enemy(context: Context, screenX: Int, screenY: Int) {
     var bitmap: Bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.robot)
-    val width = screenX / 10f
+    val width = screenX / 8f
     val height = screenY / 10f
-    val randomStartPositionX = (0..screenX).random()
+    val randomStartPositionX = (width.toInt()..screenX-width.toInt()).random()
     val randomStartPositionY = (height.toInt()..(screenY/2)).random()
     val screenXLimit = screenX
     var positionX = randomStartPositionX
@@ -20,7 +20,7 @@ class Enemy(context: Context, screenX: Int, screenY: Int) {
 
     init {
         bitmap = Bitmap.createScaledBitmap(bitmap, width.toInt(), height.toInt(), false)
-        hitbox.left = positionX.toFloat()-(width/2)
+        hitbox.left = positionX.toFloat()
         hitbox.top = randomStartPositionY.toFloat()
         hitbox.right = hitbox.left + width
         hitbox.bottom = hitbox.top + height
@@ -34,7 +34,7 @@ class Enemy(context: Context, screenX: Int, screenY: Int) {
             positionX = screenXLimit - width.toInt()/2
             speed = -10
         } else positionX += speed
-        hitbox.left = positionX.toFloat()
+        hitbox.left = positionX.toFloat()-(width/2)
         hitbox.right = hitbox.left + width
     }
 

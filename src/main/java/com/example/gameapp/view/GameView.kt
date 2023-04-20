@@ -2,13 +2,13 @@ package com.example.gameapp.view
 
 import android.content.Context
 import android.graphics.*
+import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
-import android.provider.SyncStateContract.Helpers.update
+import android.media.SoundPool
 import android.view.MotionEvent
 import android.view.SurfaceView
-import androidx.constraintlayout.motion.widget.MotionInterpolator
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.example.gameapp.R
 import com.example.gameapp.model.Enemy
 import com.example.gameapp.model.EnemyShoot
@@ -20,7 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.*
 
-class GameView(context: Context, private val size: Point) : SurfaceView(context){
+class GameView(context: Context, private val size: Point) : SurfaceView(context) {
     var canvas: Canvas = Canvas()
     private val paint: Paint = Paint()
     private val player = Player(context, size.x, size.y)
@@ -32,33 +32,41 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
     private val certainShoots = mutableListOf<Shoot>()
     private val enemyShoots = mutableListOf<EnemyShoot>()
     val background = BitmapFactory.decodeResource(context.resources, R.drawable.road_background)
-    var enemyShootSound: MediaPlayer? = MediaPlayer.create(context, R.raw.metal_scrap)
-    var playerShootSound: MediaPlayer? = MediaPlayer.create(context, R.raw.shooting_star)
+
+    var backgroundSound: MediaPlayer? = MediaPlayer.create(context, R.raw.background_game_music)
+    var soundPool: SoundPool? = SoundPool(5, AudioManager.STREAM_MUSIC, 0)
+
+    val playerShoot = soundPool?.load(context, R.raw.shooting_star, 0)
+    val enemyShoot = soundPool?.load(context, R.raw.metal_scrap, 0)
 
 
     init {
         startGame()
-    }
-
-    private fun startGame(){
-        CoroutineScope(Dispatchers.Main).launch{
-            while(playing){
-                draw()
-                update()
-                if(!playing){
-                    val toScore = GameFragmentDirections.actionGameFragmentToScoreFragment(score)
-                    findNavController().navigate(toScore)
-                    enemyShootSound?.release()
-                    playerShootSound?.release()
-                }
-                delay(10)
-            }
-
+        backgroundSound?.start()
+        backgroundSound?.setOnCompletionListener {
+            backgroundSound?.start()
         }
     }
 
+    private fun startGame() {
+        CoroutineScope(Dispatchers.Main).launch {
+            while (playing) {
+                draw()
+                update()
+                delay(10)
+            }
+            backgroundSound?.release()
+            soundPool?.release()
+            val toScore = GameFragmentDirections.actionGameFragmentToScoreFragment(score)
+            findNavController().navigate(toScore)
+        }
+    }
 
-    private fun draw(){
+    fun playSound(id: Int) {
+        soundPool?.play(id, 0.99f, 0.99f, 0, 0, 1f)
+    }
+
+    private fun draw() {
         if (holder.surface.isValid) {
             canvas = holder.lockCanvas()
             canvas.drawBitmap(background, 0f, 0f, paint)
@@ -75,37 +83,48 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
             //ENEMY
             if (enemyList.isNotEmpty()) {
                 enemyList.forEach { enemy ->
-                    canvas.drawBitmap(enemy.bitmap, enemy.positionX.toFloat()-(enemy.width/2),
-                        enemy.randomStartPositionY.toFloat()-(enemy.height/2), paint)
+                    canvas.drawBitmap(
+                        enemy.bitmap, enemy.positionX.toFloat() - (enemy.width / 2),
+                        enemy.randomStartPositionY.toFloat() - (enemy.height / 2), paint
+                    )
                 }
             }
             //PLAYER
-            canvas.drawBitmap(player.bitmap, player.positionX.toFloat()-(player.width/2),1500f, paint)
+            canvas.drawBitmap(
+                player.bitmap,
+                player.positionX.toFloat() - (player.width / 2),
+                1500f,
+                paint
+            )
             // SHOOT
-            if (shoots.isNotEmpty()){
+            if (shoots.isNotEmpty()) {
                 shoots.forEach { shoot ->
-                    canvas.drawBitmap(shoot.bitmap, shoot.positionX,
-                        shoot.positionY.toFloat(), paint)
+                    canvas.drawBitmap(
+                        shoot.bitmap, shoot.positionX,
+                        shoot.positionY.toFloat(), paint
+                    )
                 }
             }
-            if (enemyShoots.isNotEmpty()){
+            if (enemyShoots.isNotEmpty()) {
                 enemyShoots.forEach { shoot ->
-                    canvas.drawBitmap(shoot.bitmap, shoot.positionX,
-                        shoot.positionY, paint)
+                    canvas.drawBitmap(
+                        shoot.bitmap, shoot.positionX,
+                        shoot.positionY, paint
+                    )
                 }
             }
             holder.unlockCanvasAndPost(canvas)
         }
     }
 
-    private fun update(){
+    private fun update() {
         // ENEMY
         playing = player.lives > 0
         generateEnemy()
-        if (enemyList.isNotEmpty()){
+        if (enemyList.isNotEmpty()) {
             enemyList.forEach { enemy ->
                 // Cada enemigo intenta disparar
-                if (enemy.shoot()){
+                if (enemy.shoot()) {
                     enemyShoot(enemy.positionX.toFloat(), enemy.randomStartPositionY.toFloat())
                 }
                 // Mira que por cada disparo toque cada enemigo
@@ -118,7 +137,7 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
                         score += 10
                     }
                 }
-                certainShoots.forEach{ certainShoot ->
+                certainShoots.forEach { certainShoot ->
                     shoots.remove(certainShoot)
                 }
             }
@@ -126,17 +145,17 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
                 enemyList.remove(enemyHitted)
             }
         }
-        if (enemyList.isNotEmpty()){
+        if (enemyList.isNotEmpty()) {
             enemyList.forEach { it.updateEnemy() }
         }
 
 
         // SHOOT
-        if(shoots.isNotEmpty()){
+        if (shoots.isNotEmpty()) {
             val shootedShoots = mutableListOf<Shoot>()
             shoots.forEach { shoot ->
                 shoot.updateShoot()
-                if (shoot.positionY <= 0){
+                if (shoot.positionY <= 0) {
                     shootedShoots.add(shoot)
                 }
             }
@@ -145,12 +164,12 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
             }
         }
         // SHOOT ENEMY
-        if(enemyShoots.isNotEmpty()){
+        if (enemyShoots.isNotEmpty()) {
             val shootedShoots = mutableListOf<EnemyShoot>()
             val playerHitShoots = mutableListOf<EnemyShoot>()
             enemyShoots.forEach { shoot ->
                 shoot.updateShoot()
-                if (shoot.positionY >= size.y){
+                if (shoot.positionY >= size.y) {
                     shootedShoots.add(shoot)
                 }
 
@@ -164,36 +183,46 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
             playerHitShoots.forEach { shoot ->
                 enemyShoots.remove(shoot)
                 player.hitted()
-                println(player.lives)
             }
         }
-
         // PLAYER
         player.updatePlayer()
 
     }
 
     fun shoot() {
-        if (shoots.size < 5){
-            shoots.add(Shoot(context,
-                size.x, size.y, player.positionX.toFloat()-((size.x/15f)/2)))
-            playerShootSound?.start()
-        }
-    }
-    fun enemyShoot(enemyPositionX: Float, initialPositionY: Float){
-        if (enemyShoots.size < 5){
-            enemyShoots.add(
-                EnemyShoot(context,
-                size.x, size.y, enemyPositionX-((size.x/15f)/2), initialPositionY)
+        if (shoots.size < 5) {
+            shoots.add(
+                Shoot(
+                    context,
+                    size.x, size.y, player.positionX.toFloat() - ((size.x / 15f) / 2)
+                )
             )
-            enemyShootSound?.start()
+            // playerShootSound?.start()
+            if (playerShoot != null) {
+                playSound(playerShoot)
+            }
+        }
+    }
+
+    fun enemyShoot(enemyPositionX: Float, initialPositionY: Float) {
+        if (enemyShoots.size < 5) {
+            enemyShoots.add(
+                EnemyShoot(
+                    context,
+                    size.x, size.y, enemyPositionX - ((size.x / 15f) / 2), initialPositionY
+                )
+            )
+            if (enemyShoot != null) {
+                playSound(enemyShoot)
+            }
 
         }
     }
 
-    private fun generateEnemy(){
+    private fun generateEnemy() {
         val randomGenerator = Random().nextDouble()
-        if (enemyList.size < 5 && randomGenerator < 0.3){
+        if (enemyList.size < 5 && randomGenerator < 0.3) {
             val enemy = Enemy(context, size.x, size.y)
             enemyList.add(enemy)
         }
@@ -201,12 +230,12 @@ class GameView(context: Context, private val size: Point) : SurfaceView(context)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         if (event != null) {
-            when(event.action){
+            when (event.action) {
                 // Aquí capturem els events i el codi que volem executar per cadascún
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                     // Modifiquem la velocitat del jugador perquè es mogui?
-                    if(event.x>player.positionX && size.x != player.positionX){
-                        player.speed  = 10
+                    if (event.x > player.positionX && size.x != player.positionX) {
+                        player.speed = 10
                     } else player.speed = -10
                 }
                 MotionEvent.ACTION_UP -> player.speed = 0
