@@ -34,5 +34,8 @@
         <argument
             android:name="score"
             app:argType="integer" />
+        <argument
+            android:name="wasBossDefeated"
+            app:argType="boolean" />
     </fragment>
 </navigation>

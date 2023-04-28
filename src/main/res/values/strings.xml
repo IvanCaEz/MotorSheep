@@ -6,5 +6,15 @@
     <string name="menu">Menu</string>
     <string name="play_again">Play Again</string>
     <string name="sheepoints">Sheepoints</string>
+    <string name="canreturn">Now you can return home with relief and</string>
+    <string name="won">You won!</string>
+    <string name="eating_this_marvellous_vegetable_will_heal_you_for_2_points">Eating this marvellous vegetable will heal you for 2 points (❤).</string>
+    <string name="kohlrabi">Kohlrabi</string>
+    <string name="helmet">Helmet</string>
+    <string name="will_protect_you_in_case_of_being_hit">Gives 1 point of armor (🛡) and will protect you in case of being hit.</string>
+    <string name="enery_drink">Enery drink</string>
+    <string name="will_energize_you_and_while_energized_you_will_move_faster">Will energize (⚡) you and while energized you will move faster.</string>
+    <string name="got_it">Got it!</string>
+    <string name="items">Items</string>
 
 </resources>

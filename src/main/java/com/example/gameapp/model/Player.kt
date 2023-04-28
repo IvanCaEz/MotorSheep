@@ -15,7 +15,9 @@ class Player(context: Context, screenX: Int, screenY: Int) {
     var speed = 0
     var lives = 5
     var hitbox = RectF()
-
+    var armor = 0
+    var energized = false
+    var feed = false
 
     init {
         bitmap = Bitmap.createScaledBitmap(bitmap, width.toInt(), height.toInt(), false)
@@ -25,8 +27,25 @@ class Player(context: Context, screenX: Int, screenY: Int) {
         hitbox.bottom = hitbox.top + height
     }
 
+    fun useItem(item: Item){
+        when (item){
+            is Colinabo -> {
+                lives += item.effect
+                feed = true
+            }
+            is Helmet -> armor = item.effect
+            is EnergyDrink -> energized = true
+
+        }
+    }
+
     fun hitted(){
-        lives -= 1
+        if (armor != 0) armor = 0
+        else{
+            lives -= 1
+            energized = false
+            feed = false
+        }
     }
 
     fun updatePlayer() {

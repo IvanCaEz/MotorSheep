@@ -21,6 +21,7 @@ class EnemyShoot(context: Context, screenX: Int, screenY: Int, val positionX: Fl
         hitbox.top = positionY
         hitbox.right = hitbox.left + width
         hitbox.bottom = hitbox.top + height
+
     }
 
     fun updateShoot(){

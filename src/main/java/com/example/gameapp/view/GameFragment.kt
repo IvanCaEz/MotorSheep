@@ -62,16 +62,24 @@ class GameFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        if (gameView.playing){
-            gameView.backgroundSound?.pause()
-            gameView.soundPool?.release()
+        if (gameView.playing && !gameView.bossDefeated){
+            if (gameView.bossPhase){
+                gameView.backgroundSoundBoss?.pause()
+                gameView.soundPool?.release()
+
+            } else {
+                gameView.backgroundSound?.pause()
+                gameView.soundPool?.release()
+            }
         }
 
     }
 
     override fun onResume() {
         super.onResume()
-        gameView.backgroundSound?.start()
+        if (gameView.bossPhase){
+            gameView.backgroundSoundBoss?.start()
+        } else gameView.backgroundSound?.start()
     }
 
 

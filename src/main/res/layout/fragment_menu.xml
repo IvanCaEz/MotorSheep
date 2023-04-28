@@ -7,6 +7,7 @@
     android:background="@drawable/background_cut"
     tools:context=".view.MenuFragment">
 
+
     <TextView
         android:id="@+id/title1_tv"
         android:layout_width="wrap_content"
@@ -69,21 +70,29 @@
         android:text="Play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitle_tv"
         app:layout_constraintVertical_bias="0.394" />
 
     <Button
-        android:id="@+id/help_button"
+        android:id="@+id/howToPlay_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Help"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/play_button"
+        app:layout_constraintVertical_bias="0.09" />
+    <Button
+        android:id="@+id/items_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/items"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/howToPlay_button"
         app:layout_constraintVertical_bias="0.09" />
 
     <androidx.constraintlayout.widget.Guideline
